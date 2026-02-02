@@ -1,0 +1,7 @@
+{
+  "name": "Jordanian Lingo - Ahlan wa Sahlan",
+  "description": "An interactive React application designed to teach Jordanian Colloquial Arabic (Ammiya) to English speakers using Gemini AI for conversational practice and authentic pronunciation.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
