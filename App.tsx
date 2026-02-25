@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
   MapPin, Zap, Moon, Sun, Home as HomeIcon, Heart, MessageSquare, 
-  Loader2, Star, Volume2, LayoutGrid, Send, AlertTriangle, Key, Settings as SettingsIcon, X
+  Loader2, Star, Volume2, LayoutGrid, Send, AlertTriangle, Settings as SettingsIcon, X
 } from 'lucide-react';
 import { ViewState, Phrase } from './types';
 import { aiService } from './services/AiService';
@@ -15,7 +15,6 @@ import { LevelsView } from './components/views/LevelsView';
 import { FavoritesView } from './components/views/FavoritesView';
 import { LevelPhrasesView } from './components/views/LevelPhrasesView';
 import { SettingsView } from './components/views/SettingsView';
-import { ApiKeyGate } from './components/shared/ApiKeyGate';
 import { phraseRepository } from './infrastructure/PhraseRepository';
 import { RANKS } from './domain/ProgressionService';
 
@@ -29,19 +28,6 @@ const App: React.FC = () => {
   const [levelPhrases, setLevelPhrases] = useState<Phrase[]>([]);
   const [selectedLevel, setInternalSelectedLevel] = useState(1);
   const [totalInLevel, setTotalInLevel] = useState(0);
-  const [hasApiKey, setHasApiKey] = useState<boolean | null>(null);
-
-  useEffect(() => {
-    const checkKey = async () => {
-      if (typeof window !== 'undefined' && (window as any).aistudio?.hasSelectedApiKey) {
-        const has = await (window as any).aistudio.hasSelectedApiKey();
-        setHasApiKey(has);
-      } else {
-        setHasApiKey(true);
-      }
-    };
-    checkKey();
-  }, []);
 
   const loadInitialData = useCallback(async () => {
     const favs = await phraseRepository.getFavorites();
@@ -98,19 +84,9 @@ const App: React.FC = () => {
     setView('level_detail');
   };
 
-  const handleOpenKeySelector = async () => {
-    if (typeof window !== 'undefined' && (window as any).aistudio?.openSelectKey) {
-      await (window as any).aistudio.openSelectKey();
-      // Assume success as per environment rules
-      clearError();
-      setHasApiKey(true);
-    }
-  };
-
   const triggerHaptic = () => 'vibrate' in navigator && navigator.vibrate(10);
 
-  if (hasApiKey === false) return <ApiKeyGate onKeySelected={() => setHasApiKey(true)} />;
-  if (isLoading || hasApiKey === null) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#fcfaf7] dark:bg-zinc-950">
         <Loader2 className="w-12 h-12 animate-spin text-[#e2725b]" />
@@ -157,18 +133,15 @@ const App: React.FC = () => {
              <div className={`p-8 ${currentRank.color} text-white flex items-center justify-between`}>
                <div className="flex items-center gap-5">
                  <Star className="w-8 h-8 fill-current" />
-                 <h3 className="font-black text-2xl">سامي - المعلم الذكي</h3>
+                 <h3 className="font-black text-2xl">المعلم الذكي</h3>
                </div>
-               <button onClick={handleOpenKeySelector} className="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-xl text-[10px] font-black flex items-center gap-2 transition-colors">
-                 <Key className="w-4 h-4" /> تبديل المفتاح يدوياً
-               </button>
              </div>
              
              <div className="flex-1 overflow-y-auto p-8 space-y-8 bg-slate-50 dark:bg-zinc-950 no-scrollbar relative">
                {messages.length === 0 && !error && (
                  <div className="text-center py-20 space-y-4 opacity-30">
                    <MessageSquare className="w-16 h-16 mx-auto" />
-                   <p className="font-bold">ابدأ المحادثة مع سامي الآن</p>
+                   <p className="font-bold">ابدأ المحادثة مع المعلم الذكي الآن</p>
                  </div>
                )}
 
@@ -184,7 +157,7 @@ const App: React.FC = () => {
                  <div className="flex justify-start">
                    <div className="bg-white dark:bg-zinc-900 px-6 py-4 rounded-[2rem] rounded-tl-none flex items-center gap-2 shadow-sm">
                      <Loader2 className="w-5 h-5 animate-spin text-brand-orange" />
-                     <span className="text-xs font-bold text-gray-400">سامي يفكر...</span>
+                     <span className="text-xs font-bold text-gray-400">المعلم يفكر...</span>
                    </div>
                  </div>
                )}
@@ -197,38 +170,23 @@ const App: React.FC = () => {
                    
                    <div className="flex items-center gap-3 text-red-600 dark:text-red-400 relative z-10">
                      <AlertTriangle className="w-8 h-8 shrink-0" />
-                     <h4 className="font-black text-xl">انتهت حصة الاستخدام (429)</h4>
+                     <h4 className="font-black text-xl">حدث خطأ في الاتصال</h4>
                    </div>
                    
                    <div className="space-y-4 relative z-10">
                      <p className="text-gray-700 dark:text-zinc-300 font-bold leading-relaxed">
-                       المفتاح الحالي استهلك كامل حصته المجانية. لاستكمال التعلم دون انقطاع، يرجى **وضع مفتاحك الخاص (AIzaSy...) يدوياً**.
+                       حدث خطأ أثناء محاولة الاتصال بالمعلم. يرجى التأكد من اتصالك بالإنترنت أو المحاولة مرة أخرى لاحقاً.
                      </p>
                      
                      <div className="flex flex-col sm:flex-row gap-4">
                        <button 
-                         onClick={handleOpenKeySelector} 
-                         className="flex-1 bg-red-600 text-white px-8 py-4 rounded-2xl font-black shadow-lg shadow-red-500/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2"
-                       >
-                         <Key className="w-5 h-5" /> ربط مفتاح يدوياً
-                       </button>
-                       <button 
                          onClick={clearError} 
-                         className="px-6 py-4 bg-white dark:bg-zinc-800 text-gray-400 rounded-2xl font-bold border border-gray-100 dark:border-zinc-700"
+                         className="flex-1 bg-red-600 text-white px-8 py-4 rounded-2xl font-black shadow-lg shadow-red-500/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2"
                        >
                          إغلاق
                        </button>
                      </div>
                    </div>
-                   
-                   <a 
-                     href="https://ai.google.dev/gemini-api/docs/billing" 
-                     target="_blank" 
-                     rel="noreferrer"
-                     className="block text-center text-xs text-red-500/60 hover:underline font-bold"
-                   >
-                     كيف أحصل على مفتاح مدفوع أو مجاني جديد؟
-                   </a>
                  </div>
                )}
              </div>
@@ -239,7 +197,7 @@ const App: React.FC = () => {
                  value={userInput} 
                  onChange={(e) => setUserInput(e.target.value)} 
                  onKeyDown={(e) => e.key === 'Enter' && userInput.trim() && !isTyping && !error && (sendMessage(userInput), setUserInput(''))} 
-                 placeholder={error ? "يرجى تغيير المفتاح للمتابعة..." : "دردش مع سامي بالعامية..."}
+                 placeholder={error ? "حدث خطأ في الاتصال..." : "دردش مع المعلم بالعامية..."}
                  disabled={!!error || isTyping} 
                  className="flex-1 bg-gray-50 dark:bg-zinc-800 rounded-[2rem] px-8 py-5 outline-none font-bold text-gray-700 dark:text-zinc-200 disabled:opacity-50" 
                />
@@ -285,7 +243,7 @@ const App: React.FC = () => {
             {Icon: HomeIcon, id: 'home', label: 'الرئيسية'}, 
             {Icon: LayoutGrid, id: 'levels', label: 'المستويات'}, 
             {Icon: Heart, id: 'favorites', label: 'المفضلة'}, 
-            {Icon: MessageSquare, id: 'tutor', label: 'سامي'},
+            {Icon: MessageSquare, id: 'tutor', label: 'المعلم'},
             {Icon: SettingsIcon, id: 'settings', label: 'الإعدادات'}
           ].map(item => (
             <button key={item.id} onClick={() => { setView(item.id as ViewState); triggerHaptic(); }} className={`flex flex-col items-center gap-2 transition-all ${view === item.id ? 'text-[#e2725b] scale-110' : 'text-gray-400'}`}>

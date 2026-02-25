@@ -3,8 +3,7 @@ import { GoogleGenAI, Modality, Type } from "@google/genai";
 import { audioService } from "./audioService";
 
 export const getTutorChatStream = async (history: any[] = [], userLevelName: string = 'Beginner') => {
-  // Always create a new instance to ensure we pick up the latest API key from the environment/dialog
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
   
   const geminiHistory = history.map(m => ({
     role: m.role,
@@ -14,7 +13,7 @@ export const getTutorChatStream = async (history: any[] = [], userLevelName: str
   return ai.models.generateContentStream({
     model: 'gemini-3-flash-preview',
     config: {
-      systemInstruction: `You are "Sami", a professional Jordanian AI Tutor. 
+      systemInstruction: `You are a professional Jordanian AI Tutor. 
       Your task is to teach Jordanian Ammiya (colloquial Arabic) to English speakers.
 
       STRICT OUTPUT FORMAT (Every part on a NEW LINE):
@@ -50,7 +49,7 @@ export const generateSpeech = async (text: string) => {
   if (cached) return cached;
 
   try {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash-preview-tts",
       contents: [{ parts: [{ text: cleanText }] }],

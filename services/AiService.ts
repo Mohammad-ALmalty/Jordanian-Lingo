@@ -8,11 +8,8 @@ export interface IAiService {
 }
 
 class GeminiAiService implements IAiService {
-  // Always instantiate inside the method to pick up the most recent process.env.API_KEY
-  // after the user has used openSelectKey()
-
   async getChatStream(history: ChatMessage[], levelName: string) {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
     const contents = history.map(m => ({
       role: m.role,
       parts: [{ text: m.text }]
@@ -21,7 +18,7 @@ class GeminiAiService implements IAiService {
     return ai.models.generateContentStream({
       model: 'gemini-3-flash-preview',
       config: {
-        systemInstruction: `You are "Sami", a Jordanian AI Tutor. 
+        systemInstruction: `You are a Jordanian AI Tutor. 
         Your goal is to teach Jordanian dialect to English speakers.
         
         MANDATORY FORMAT FOR TRANSLATIONS:
@@ -40,7 +37,7 @@ class GeminiAiService implements IAiService {
   }
 
   async generateSpeech(text: string): Promise<string | null> {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
     const firstLine = text.split('\n')[0];
     const cleanText = firstLine.replace(/[^\u0600-\u06FF\s؟!.،]/g, '').trim();
     try {

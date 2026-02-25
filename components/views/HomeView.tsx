@@ -31,6 +31,14 @@ export const HomeView: React.FC<HomeViewProps> = ({
           <p className="text-gray-500 dark:text-zinc-400 font-medium max-w-lg">
             Master the Jordanian dialect one phrase at a time.
           </p>
+          <div className="pt-2">
+            <button 
+              onClick={() => onNavigate('tutor')}
+              className="bg-brand-orange text-white px-6 py-3 rounded-2xl font-black flex items-center gap-2 hover:scale-105 transition-all shadow-lg text-sm"
+            >
+              <MessageSquare className="w-4 h-4" /> Talk to AI
+            </button>
+          </div>
         </div>
       </section>
 
@@ -60,7 +68,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
 
       <section className="bg-brand-orange rounded-[3.5rem] p-10 text-white flex flex-col md:flex-row items-center justify-between gap-8 shadow-xl">
         <div className="text-center md:text-left">
-          <h3 className="text-2xl font-black">Talk to Sami</h3>
+          <h3 className="text-2xl font-black">Talk to AI</h3>
           <p className="text-orange-100 font-medium">Practice your Ammiya in real-time.</p>
         </div>
         <button 
